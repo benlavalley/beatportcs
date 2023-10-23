@@ -13,8 +13,9 @@ function genRandName()
 
 const baseUrl = 'www.beatport.com';
 const chartRandomName = genRandName();
-const baseNum = 778948;
-const maxIterate = 1000;
+const delayMs = 100; // delay each request by 100ms so we dont totally flood Beatport... even though these are sequential I want to be a good client!
+const baseNum = 780934;
+const maxIterate = 5000;
 const finalIterate = baseNum + maxIterate;
 let filename = `${baseNum}_to_${baseNum+maxIterate}.csv`;
 filename = filename.split('.').join('-' + Date.now() + '.');
@@ -25,6 +26,20 @@ const useProxy = true;
 const proxyUrl = `http://proxy9:8888`
 const agent = useProxy && proxyUrl && proxyUrl.length && new HttpsProxyAgent(proxyUrl);
 let iterateUrlNum = 0;
+
+let writeOnce;
+
+function writeHeader() {
+	const headerLine = []
+	headerLine.push('url');
+	headerLine.push('chart name');
+	headerLine.push('publish date');
+	headerLine.push('collect date');
+	headerLine.push('chart genre 1');
+	headerLine.push('chart genre 2');
+	fs.writeFileSync(filename,headerLine.join(',')+ '\n');
+	writeOnce = true;
+}
 
 function callAPIs(i) {
 	return new Promise((resolve, reject) => {
@@ -60,6 +75,9 @@ function callAPIs(i) {
 									const genre1 = chartGenres && chartGenres[0] && chartGenres[0].name;
 									const genre2 = chartGenres && chartGenres[1] && chartGenres[1].name;
 									const reconstructedUrl = `https://${baseUrl}/chart/${chart.slug}/${chart.id}`;
+									if (!writeOnce) {
+										writeHeader();
+									}
 									let newLine = []
 									newLine.push(reconstructedUrl);
 									newLine.push(chart.name);
@@ -92,15 +110,6 @@ function callAPIs(i) {
 	});
 }
 
-const headerLine = []
-headerLine.push('url');
-headerLine.push('chart name');
-headerLine.push('publish date');
-headerLine.push('collect date');
-headerLine.push('chart genre 1');
-headerLine.push('chart genre 2');
-fs.writeFileSync(filename,headerLine.join(',')+ '\n');
-
 console.log('** Beatport "Best New" list collection beginning for '+baseNum+' and running '+maxIterate+' times...');
 
 for (let i = 0; i < maxIterate; i++) {
@@ -108,7 +117,12 @@ for (let i = 0; i < maxIterate; i++) {
 	if (iterateUrlNum && percentComplete  % 1 === 0) {
 		console.log(percentComplete+'% complete at iteration '+iterateUrlNum);
 	}
-	await callAPIs(i);
+	try {
+		await new Promise(r => setTimeout(r, delayMs));
+		await callAPIs(i);
+	} catch (e) {
+		console.log('error processing request for iteration '+iterateUrlNum+' - error is : ', e);
+	}
 }
 
 console.log('** Beatport "Best New" list collection done - began at '+baseNum+' and finished at '+iterateUrlNum);
