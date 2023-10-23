@@ -1,0 +1,24 @@
+{
+  "name": "beatportcs",
+  "version": "1.0.0",
+  "description": "pulls beatport charts.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benlavalley/beatportcs.git"
+  },
+  "keywords": [
+    "beatport",
+    "chart",
+    "scraper"
+  ],
+  "author": "ben@nibbl.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benlavalley/beatportcs/issues"
+  },
+  "homepage": "https://github.com/benlavalley/beatportcs#readme"
+}
