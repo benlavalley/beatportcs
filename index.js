@@ -2,13 +2,13 @@ import {JSDOM} from "jsdom"
 import https from 'https';
 import fs from 'fs';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import genRandName from 'genRandName.js';
-import writeHeader from 'writeHeader.js';
+import genRandName from './genRandName.js';
+import writeHeader from './writeHeader.js';
 
 const baseUrl = 'www.beatport.com';
 const chartRandomName = genRandName();
 const delayMs = 100; // delay each request by 100ms so we dont totally flood Beatport... even though these are sequential I want to be a good client!
-const baseNum = 783433;
+const baseNum = 785933;
 const maxIterate = 5000;
 
 let filename = `${baseNum}_to_${baseNum+maxIterate}.csv`;
