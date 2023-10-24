@@ -2,44 +2,24 @@ import {JSDOM} from "jsdom"
 import https from 'https';
 import fs from 'fs';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-function genRandName()
-{
-	let text="";
-	let alphabet="abcdefghijklmnopqrstuvwxyz"
-	for(let i=0; i<10; i++)
-		text +=alphabet.charAt(Math.floor(Math.random()*alphabet.length))
-	return text;
-}
+import genRandName from 'genRandName.js';
+import writeHeader from 'writeHeader.js';
 
 const baseUrl = 'www.beatport.com';
 const chartRandomName = genRandName();
 const delayMs = 100; // delay each request by 100ms so we dont totally flood Beatport... even though these are sequential I want to be a good client!
-const baseNum = 780934;
+const baseNum = 783433;
 const maxIterate = 5000;
-const finalIterate = baseNum + maxIterate;
+
 let filename = `${baseNum}_to_${baseNum+maxIterate}.csv`;
 filename = filename.split('.').join('-' + Date.now() + '.');
-
-// if not using a proxy set to false.
-
-const useProxy = true;
+const useProxy = true; // if not using a proxy set to false.
 const proxyUrl = `http://proxy9:8888`
 const agent = useProxy && proxyUrl && proxyUrl.length && new HttpsProxyAgent(proxyUrl);
-let iterateUrlNum = 0;
 
+let iterateUrlNum = 0;
 let writeOnce;
 
-function writeHeader() {
-	const headerLine = []
-	headerLine.push('url');
-	headerLine.push('chart name');
-	headerLine.push('publish date');
-	headerLine.push('collect date');
-	headerLine.push('chart genre 1');
-	headerLine.push('chart genre 2');
-	fs.writeFileSync(filename,headerLine.join(',')+ '\n');
-	writeOnce = true;
-}
 
 function callAPIs(i) {
 	return new Promise((resolve, reject) => {
@@ -76,7 +56,8 @@ function callAPIs(i) {
 									const genre2 = chartGenres && chartGenres[1] && chartGenres[1].name;
 									const reconstructedUrl = `https://${baseUrl}/chart/${chart.slug}/${chart.id}`;
 									if (!writeOnce) {
-										writeHeader();
+										writeHeader(filename);
+										writeOnce = true;
 									}
 									let newLine = []
 									newLine.push(reconstructedUrl);
